@@ -54,7 +54,7 @@ Testing completion for the `fish` shell is relatively simple as the `fish` shell
 allows to trigger completion from a test script by using `complete --do-complete <commandLine>`.
 With this approach, it is also possible to check if file completion is triggered or not
 (to test `ShellCompDirectiveNoFileComp`).
-See [comp-tests-lib.fish](tests/bash/comp-tests-lib.fish).
+See [comp-tests-lib.fish](src/comp-tests-lib.fish).
 
 ## bash
 
@@ -71,5 +71,5 @@ Testing the special directives is slightly more complicated however.  The `compo
 cannot be used outside of a real completion scenario, so it cannot be used during the
 regression tests.  The tests replace it with their own implementation and keep track
 of what directives have been enabled/disabled to verify it is what is expected.
-See [comp-tests-lib.bash](tests/bash/comp-tests-lib.bash).
+See [comp-tests-lib.bash](src/comp-tests-lib.bash).
 

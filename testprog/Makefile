@@ -2,11 +2,8 @@ BINDIR      := $(CURDIR)/bin
 BINNAME     ?= testprog
 SRC        := $(shell find . -type f -name '*.go' -print)
 
-GOBIN         = $(shell go env GOBIN)
-ifeq ($(GOBIN),)
-GOBIN         = $(shell go env GOPATH)/bin
-endif
-GOX           = $(GOBIN)/gox
+GOBIN = $(shell go env GOBIN)
+GOBIN ?= $(shell go env GOPATH)/bin
 
 .PHONY: all
 all: build
@@ -15,17 +12,10 @@ all: build
 build: $(BINDIR)/$(BINNAME)
 
 $(BINDIR)/$(BINNAME): $(SRC)
-	CGO_ENABLED=0 go build -o '$(BINDIR)'/$(BINNAME) -ldflags '-extldflags "-static"' .
-
-# If go get is run from inside the project directory it will add the dependencies
-# to the go.mod file. To avoid that we change to a directory without a go.mod file
-# when downloading the following dependencies
-$(GOX):
-	(cd /; go get -u github.com/mitchellh/gox)
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o "$(BINDIR)/$(BINNAME)"  -ldflags '-extldflags "-static"' .
 
 .PHONY: build-linux
-build-linux: $(GOX)
-	CGO_ENABLED=0 $(GOX) -output="$(BINDIR)/$(BINNAME)" -osarch='linux/amd64' -ldflags '-extldflags "-static"' .
+build-linux: $(BINDIR)/$(BINNAME)
 
 .PHONY: clean
 clean:

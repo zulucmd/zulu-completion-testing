@@ -8,7 +8,7 @@ set ROOTDIR (pwd)
 set PATH $ROOTDIR/testprog/bin:$PATH
 
 # Source the testing logic
-source tests/fish/comp-test-lib.fish
+source src/comp-test-lib.fish
 
 #################################################
 # Setup completion with descriptions
