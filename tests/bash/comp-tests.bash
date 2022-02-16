@@ -40,9 +40,6 @@ export PATH=$ROOTDIR/testprog/bin:$PATH
 
 # Are we testing Cobra's bash completion v1 or v2?
 BASHCOMP_VERSION=bash
-if [ -n "$BASHCOMPV2" ]; then
-    BASHCOMP_VERSION=bash2
-fi
 
 # Source the testing logic
 source tests/bash/comp-test-lib.bash
@@ -60,14 +57,8 @@ EOF
 
 cd testingdir
 
-# Basic first level commands (static completion)
-if [ "$BASHCOMP_VERSION" = bash2 ]; then
-    _completionTests_verifyCompletion "testprog comp" "completion" nofile
-    _completionTests_verifyCompletion "testprog completion " "bash bash2 fish powershell zsh" nofile
-else
-    _completionTests_verifyCompletion "testprog comp" "completion"
-    _completionTests_verifyCompletion "testprog completion " "bash bash2 fish powershell zsh"
-fi
+_completionTests_verifyCompletion "testprog comp" "completion" nofile
+_completionTests_verifyCompletion "testprog completion " "bash fish powershell zsh" nofile
 _completionTests_verifyCompletion "testprog help comp" "completion" nofile
 _completionTests_verifyCompletion "testprog completion bash " "" nofile
 
@@ -144,11 +135,7 @@ _completionTests_verifyCompletion "testprog error u" ""
 #################################################
 # Flags
 #################################################
-if [ "$BASHCOMP_VERSION" = bash2 ]; then
-    _completionTests_verifyCompletion "testprog --custom" "--customComp" nofile
-else
-    _completionTests_verifyCompletion "testprog --custom" "--customComp --customComp=" nospace
-fi
+_completionTests_verifyCompletion "testprog --custom" "--customComp" nofile
 _completionTests_verifyCompletion "testprog --customComp " "firstComp secondComp forthComp" nofile
 _completionTests_verifyCompletion "testprog --customComp f" "firstComp forthComp" nofile
 _completionTests_verifyCompletion "testprog --customComp=" "firstComp secondComp forthComp" nofile
@@ -199,77 +186,73 @@ _completionTests_verifyCompletion "testprog prefix nospace b" "bear bearpaw" nos
 _completionTests_verifyCompletion "testprog prefix nofile b" "bear bearpaw" nofile
 unset COMP_TYPE
 
-# Test descriptions of bash v2
-if [ "$BASHCOMP_VERSION" = bash2 ]; then
-
-  # Setup completion of testprog, enabling descriptions for v2.
-  # Don't use the new source <() form as it does not work with bash v3.
-  # Normally, compopt is a builtin, and the script checks that it is a
-  # builtin to disable it if we are in bash3 (where compopt does not exist).
-  # We replace 'builtin' with 'function' because we cannot use the native
-  # compopt since we are explicitely calling the completion code instead
-  # of from within a real completion environment.
-  source /dev/stdin <<- EOF
-     $(testprog completion --no-descriptions=false $BASHCOMP_VERSION | sed s/builtin/function/g)
+# Setup completion of testprog, enabling descriptions for v2.
+# Don't use the new source <() form as it does not work with bash v3.
+# Normally, compopt is a builtin, and the script checks that it is a
+# builtin to disable it if we are in bash3 (where compopt does not exist).
+# We replace 'builtin' with 'function' because we cannot use the native
+# compopt since we are explicitely calling the completion code instead
+# of from within a real completion environment.
+source /dev/stdin <<- EOF
+   $(testprog completion --no-descriptions=false $BASHCOMP_VERSION | sed s/builtin/function/g)
 EOF
 
-   # Disable sorting of output because it would mix up the descriptions
-   BASH_COMP_NO_SORT=1
+ # Disable sorting of output because it would mix up the descriptions
+ BASH_COMP_NO_SORT=1
 
-   # When running docker without the --tty/-t flag, the COLUMNS variable is not set
-   # bash completion v2 needs it to handle descriptions, so we set it here if it is unset
-   COLUMNS=${COLUMNS-100}
+ # When running docker without the --tty/-t flag, the COLUMNS variable is not set
+ # bash completion v2 needs it to handle descriptions, so we set it here if it is unset
+ COLUMNS=${COLUMNS-100}
 
-   # Test descriptions with ShellCompDirectiveDefault
-   _completionTests_verifyCompletion "testprog prefix default " "bear     (an animal)
+ # Test descriptions with ShellCompDirectiveDefault
+ _completionTests_verifyCompletion "testprog prefix default " "bear     (an animal)
 bearpaw  (a dessert)
 dog
 unicorn  (mythical)"
-   _completionTests_verifyCompletion "testprog prefix default b" "bear     (an animal)
+ _completionTests_verifyCompletion "testprog prefix default b" "bear     (an animal)
 bearpaw  (a dessert)"
-   _completionTests_verifyCompletion "testprog prefix default bearp" "bearpaw"
+ _completionTests_verifyCompletion "testprog prefix default bearp" "bearpaw"
 
-   # Test descriptions with ShellCompDirectiveNoFileComp
-   _completionTests_verifyCompletion "testprog prefix nofile " "bear     (an animal)
+ # Test descriptions with ShellCompDirectiveNoFileComp
+ _completionTests_verifyCompletion "testprog prefix nofile " "bear     (an animal)
 bearpaw  (a dessert)
 dog
 unicorn  (mythical)" nofile
-   _completionTests_verifyCompletion "testprog prefix nofile b" "bear     (an animal)
+ _completionTests_verifyCompletion "testprog prefix nofile b" "bear     (an animal)
 bearpaw  (a dessert)" nofile
-   _completionTests_verifyCompletion "testprog prefix nofile bearp" "bearpaw" nofile
+ _completionTests_verifyCompletion "testprog prefix nofile bearp" "bearpaw" nofile
 
-   # Test descriptions with ShellCompDirectiveNoSpace
-   _completionTests_verifyCompletion "testprog prefix nospace " "bear     (an animal)
+ # Test descriptions with ShellCompDirectiveNoSpace
+ _completionTests_verifyCompletion "testprog prefix nospace " "bear     (an animal)
 bearpaw  (a dessert)
 dog
 unicorn  (mythical)" nospace
-   _completionTests_verifyCompletion "testprog prefix nospace b" "bear     (an animal)
+ _completionTests_verifyCompletion "testprog prefix nospace b" "bear     (an animal)
 bearpaw  (a dessert)" nospace
-   _completionTests_verifyCompletion "testprog prefix nospace bearp" "bearpaw" nospace
+ _completionTests_verifyCompletion "testprog prefix nospace bearp" "bearpaw" nospace
 
-   # Test descriptions with completion of flag values
-   _completionTests_verifyCompletion "testprog --customComp " "firstComp   (the first value)
+ # Test descriptions with completion of flag values
+ _completionTests_verifyCompletion "testprog --customComp " "firstComp   (the first value)
 secondComp  (the second value)
 forthComp" nofile
-   _completionTests_verifyCompletion "testprog --customComp f" "firstComp  (the first value)
+ _completionTests_verifyCompletion "testprog --customComp f" "firstComp  (the first value)
 forthComp" nofile
-   _completionTests_verifyCompletion "testprog --customComp fi" "firstComp" nofile
+ _completionTests_verifyCompletion "testprog --customComp fi" "firstComp" nofile
 
-   # Test descriptions are properly removed when using other bash completion types
-   # The types are: menu-complete/menu-complete-backward (COMP_TYPE == 37)
-   # and insert-completions (COMP_TYPE == 42)
-   COMP_TYPE=37
-   _completionTests_verifyCompletion "testprog prefix nospace b" "bear
+ # Test descriptions are properly removed when using other bash completion types
+ # The types are: menu-complete/menu-complete-backward (COMP_TYPE == 37)
+ # and insert-completions (COMP_TYPE == 42)
+ COMP_TYPE=37
+ _completionTests_verifyCompletion "testprog prefix nospace b" "bear
 bearpaw" nospace
-   _completionTests_verifyCompletion "testprog prefix nofile b" "bear
+ _completionTests_verifyCompletion "testprog prefix nofile b" "bear
 bearpaw" nofile
-   COMP_TYPE=42
-   _completionTests_verifyCompletion "testprog prefix nospace b" "bear
+ COMP_TYPE=42
+ _completionTests_verifyCompletion "testprog prefix nospace b" "bear
 bearpaw" nospace
-   _completionTests_verifyCompletion "testprog prefix nofile b" "bear
+ _completionTests_verifyCompletion "testprog prefix nofile b" "bear
 bearpaw" nofile
-   unset COMP_TYPE
-fi
+ unset COMP_TYPE
 
 # This must be the last call.  It allows to exit with an exit code
 # that reflects the final status of all the tests.

@@ -18,39 +18,31 @@ package main
 import (
 	"io"
 
-	"github.com/spf13/cobra"
+	"github.com/gowarden/zulu"
 )
 
 var disableCompDescriptions bool
 
-func nofilecomp(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return nil, cobra.ShellCompDirectiveNoFileComp
+func nofilecomp(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
+	return nil, zulu.ShellCompDirectiveNoFileComp
 }
 
-func newCompletionCmd(out io.Writer) *cobra.Command {
-	cmd := &cobra.Command{Use: "completion"}
+func newCompletionCmd(out io.Writer) *zulu.Command {
+	cmd := &zulu.Command{Use: "completion"}
 	cmd.PersistentFlags().BoolVar(&disableCompDescriptions, "no-descriptions", false, "disable completion descriptions")
 
-	bash := &cobra.Command{
+	bash := &zulu.Command{
 		Use:               "bash",
 		ValidArgsFunction: nofilecomp,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Root().GenBashCompletion(out)
+		RunE: func(cmd *zulu.Command, args []string) error {
+			return cmd.Root().GenBashCompletion(out, !disableCompDescriptions)
 		},
 	}
 
-	bash2 := &cobra.Command{
-		Use:               "bash2",
-		ValidArgsFunction: nofilecomp,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Root().GenBashCompletionV2(out, !disableCompDescriptions)
-		},
-	}
-
-	zsh := &cobra.Command{
+	zsh := &zulu.Command{
 		Use:               "zsh",
 		ValidArgsFunction: nofilecomp,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *zulu.Command, args []string) error {
 			if disableCompDescriptions {
 				return cmd.Root().GenZshCompletionNoDesc(out)
 			} else {
@@ -59,18 +51,18 @@ func newCompletionCmd(out io.Writer) *cobra.Command {
 		},
 	}
 
-	fish := &cobra.Command{
+	fish := &zulu.Command{
 		Use:               "fish",
 		ValidArgsFunction: nofilecomp,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *zulu.Command, args []string) error {
 			return cmd.Root().GenFishCompletion(out, !disableCompDescriptions)
 		},
 	}
 
-	pwsh := &cobra.Command{
+	pwsh := &zulu.Command{
 		Use:               "powershell",
 		ValidArgsFunction: nofilecomp,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *zulu.Command, args []string) error {
 			if disableCompDescriptions {
 				return cmd.Root().GenPowerShellCompletion(out)
 			} else {
@@ -79,7 +71,7 @@ func newCompletionCmd(out io.Writer) *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(bash, bash2, zsh, fish, pwsh)
+	cmd.AddCommand(bash, zsh, fish, pwsh)
 
 	return cmd
 }

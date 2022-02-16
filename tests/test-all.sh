@@ -56,17 +56,9 @@ if [ $SHELL_TYPE = bash ]; then
       COPY . .
 EOF
    echo "======================================"
-   echo "Testing with $(basename $CONTAINER_ENGINE)"
+   echo "Testing with $(basename $CONTAINER_ENGINE) bash"
    echo "======================================"
    $CONTAINER_ENGINE run --rm \
-           ${IMAGE} tests/bash/comp-tests.bash
-
-   # Test bashCompletionV2
-   echo "======================================"
-   echo "Testing with $(basename $CONTAINER_ENGINE) bash v2"
-   echo "======================================"
-   $CONTAINER_ENGINE run --rm \
-           -e BASHCOMPV2=1 \
            ${IMAGE} tests/bash/comp-tests.bash
 fi
 
@@ -87,14 +79,6 @@ EOF
    echo "Testing with $(basename $CONTAINER_ENGINE)"
    echo "======================================"
    $CONTAINER_ENGINE run --rm \
-           ${IMAGE} tests/bash/comp-tests.bash
-
-   # Test bashCompletionV2
-   echo "======================================"
-   echo "Testing with $(basename $CONTAINER_ENGINE) bash v2"
-   echo "======================================"
-   $CONTAINER_ENGINE run --rm \
-           -e BASHCOMPV2=1 \
            ${IMAGE} tests/bash/comp-tests.bash
 fi
 
@@ -121,15 +105,6 @@ EOF
    $CONTAINER_ENGINE run --rm \
            -e BASH_COMPLETION=/usr/share/bash-completion \
            ${IMAGE} tests/bash/comp-tests.bash
-
-   # Test bashCompletionV2
-   echo "======================================"
-   echo "Testing with $(basename $CONTAINER_ENGINE) bash v2"
-   echo "======================================"
-   $CONTAINER_ENGINE run --rm \
-           -e BASH_COMPLETION=/usr/share/bash-completion \
-           -e BASHCOMPV2=1 \
-           ${IMAGE} tests/bash/comp-tests.bash
 fi
 
 ########################################
@@ -149,14 +124,6 @@ EOF
    echo "Testing with $(basename $CONTAINER_ENGINE) with CentOS"
    echo "======================================"
    $CONTAINER_ENGINE run --rm \
-           ${IMAGE} tests/bash/comp-tests.bash
-
-   # Test bashCompletionV2
-   echo "======================================"
-   echo "Testing with $(basename $CONTAINER_ENGINE) bash v2"
-   echo "======================================"
-   $CONTAINER_ENGINE run --rm \
-           -e BASHCOMPV2=1 \
            ${IMAGE} tests/bash/comp-tests.bash
 fi
 
@@ -198,10 +165,6 @@ if [ "$(uname)" == "Darwin" ]; then
     if [ $SHELL_TYPE = bash ]; then
        if which bash > /dev/null && [ -f /usr/local/etc/profile.d/bash_completion.sh ]; then
           tests/bash/comp-tests.bash
-
-          # Test bashCompletionV2
-          echo "Testing bash v2"
-          BASHCOMPV2=1 tests/bash/comp-tests.bash
        else
           echo
           echo "Bash or bash_completion package not available locally, skipping MacOS"
