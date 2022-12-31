@@ -18,9 +18,9 @@ testprog completion fish | source
 cd testingdir
 
 # Basic first level commands (static completion)
-_completionTests_verifyCompletion "testprog comp" "completion"
-_completionTests_verifyCompletion "testprog help comp" "completion"
-_completionTests_verifyCompletion "testprog completion " "bash fish powershell zsh"
+_completionTests_verifyCompletion "testprog comp" "completion	Generate the autocompletion script for the specified shell"
+_completionTests_verifyCompletion "testprog help comp" "completion	Generate the autocompletion script for the specified shell"
+_completionTests_verifyCompletion "testprog completion " "bash	Generate the autocompletion script for bash fish	Generate the autocompletion script for fish powershell	Generate the autocompletion script for powershell zsh	Generate the autocompletion script for zsh"
 _completionTests_verifyCompletion "testprog completion bash " ""
 
 #################################################
@@ -128,11 +128,13 @@ _completionTests_verifyCompletion " testprog prefix default u" "unicorn	mythical
 # Test using env variable and ~
 # https://github.com/spf13/cobra/issues/1306
 set OLD_HOME $HOME
-set HOME /tmp
+set HOME $(mktemp -d)
 cp $ROOTDIR/testprog/bin/testprog $HOME/
 _completionTests_verifyCompletion '$HOME/testprog prefix default u' "unicorn	mythical"
 # Must use single quotes to keep the environment variable
 _completionTests_verifyCompletion "~/testprog prefix default u" "unicorn	mythical"
+rm $HOME/testprog
+rmdir $HOME
 set HOME $OLD_HOME
 
 # An argument starting with dashes
@@ -140,12 +142,12 @@ _completionTests_verifyCompletion "testprog dasharg " "--arg	an arg starting wit
 _completionTests_verifyCompletion "testprog dasharg -- --" "--arg	an arg starting with dashes"
 
 # Multiple commands on the same line
-_completionTests_verifyCompletion "echo hello; testprog comp" "completion"
+_completionTests_verifyCompletion "echo hello; testprog comp" "completion	Generate the autocompletion script for the specified shell"
 
 # Unmatched quote
 # https://github.com/spf13/cobra/issues/1214
 # If there is a regression with this tests, we will see some error printouts from fish, even
-# though we may not get an error code. 
+# though we may not get an error code.
 _completionTests_verifyCompletion "testprog '" ""
 
 # Test debug printouts

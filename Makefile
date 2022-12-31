@@ -1,20 +1,25 @@
 TESTPROG_DIR := $(CURDIR)/testprog
 
+TESTS := $(patsubst tests/Dockerfile.%,%,$(wildcard tests/Dockerfile.*))
+SHELLS := bash fish
+
+containing = $(foreach v,$2,$(if $(findstring $1,$v),$v))
+not-containing = $(foreach v,$2,$(if $(findstring $1,$v),,$v))
+
 .PHONY: all
-all:
-	@src/test-all.sh bash fish
+all: $(TESTS)
 
 .PHONY: build-linux
 build-linux:
 	@cd $(TESTPROG_DIR) && make build-linux
 
-.PHONY: bash
-bash:
-	@src/test-all.sh bash
+.PHONE: $(TESTS)
+$(TESTS): build-linux
+	@src/test-all.sh $@
 
-.PHONY: fish
-fish:
-	@src/test-all.sh fish
+.PHONY: $(SHELLS)
+$(SHELLS):
+	$(MAKE) $(call containing,$@,$(TESTS))
 
 .PHONY: test
 test: clean

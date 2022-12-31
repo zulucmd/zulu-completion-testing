@@ -13,6 +13,8 @@ var (
 	specialCharComps = []string{"at@", "equal=", "slash/", "colon:", "period.", "comma,", "letter"}
 )
 
+func noopRun(_ *zulu.Command, _ []string) error { return nil }
+
 func getCompsFilteredByPrefix(prefix string) []string {
 	var finalComps []string
 	for _, comp := range completions {
@@ -25,8 +27,9 @@ func getCompsFilteredByPrefix(prefix string) []string {
 
 var rootCmd = &zulu.Command{
 	Use: "testprog",
-	Run: func(cmd *zulu.Command, args []string) {
+	RunE: func(cmd *zulu.Command, args []string) error {
 		fmt.Println("rootCmd called")
+		return nil
 	},
 }
 
@@ -44,7 +47,7 @@ var defaultCmdPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return getCompsFilteredByPrefix(toComplete), zulu.ShellCompDirectiveDefault
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 var noSpaceCmdPrefix = &zulu.Command{
@@ -53,7 +56,7 @@ var noSpaceCmdPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return getCompsFilteredByPrefix(toComplete), zulu.ShellCompDirectiveNoSpace
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 var noSpaceCharCmdPrefix = &zulu.Command{
@@ -68,7 +71,7 @@ var noSpaceCharCmdPrefix = &zulu.Command{
 		}
 		return finalComps, zulu.ShellCompDirectiveNoSpace
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 var noFileCmdPrefix = &zulu.Command{
@@ -77,7 +80,7 @@ var noFileCmdPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return getCompsFilteredByPrefix(toComplete), zulu.ShellCompDirectiveNoFileComp
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 var noFileNoSpaceCmdPrefix = &zulu.Command{
@@ -86,7 +89,7 @@ var noFileNoSpaceCmdPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return getCompsFilteredByPrefix(toComplete), zulu.ShellCompDirectiveNoFileComp | zulu.ShellCompDirectiveNoSpace
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 // ======================================================
@@ -103,7 +106,7 @@ var noSpaceCmdNoPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return completions, zulu.ShellCompDirectiveNoSpace
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 var noFileCmdNoPrefix = &zulu.Command{
@@ -112,7 +115,7 @@ var noFileCmdNoPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return completions, zulu.ShellCompDirectiveNoFileComp
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 var noFileNoSpaceCmdNoPrefix = &zulu.Command{
@@ -121,7 +124,7 @@ var noFileNoSpaceCmdNoPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return completions, zulu.ShellCompDirectiveNoFileComp | zulu.ShellCompDirectiveNoSpace
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 var defaultCmdNoPrefix = &zulu.Command{
@@ -130,7 +133,7 @@ var defaultCmdNoPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return completions, zulu.ShellCompDirectiveDefault
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 // ======================================================
@@ -142,7 +145,7 @@ var fileExtCmdPrefix = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return []string{"yaml", "json"}, zulu.ShellCompDirectiveFilterFileExt
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 // ======================================================
@@ -154,7 +157,7 @@ var dirCmd = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return nil, zulu.ShellCompDirectiveFilterDirs
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 // ======================================================
@@ -166,7 +169,7 @@ var subDirCmd = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return []string{"dir"}, zulu.ShellCompDirectiveFilterDirs
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 // ======================================================
@@ -178,7 +181,7 @@ var errorCmd = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return completions, zulu.ShellCompDirectiveError
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
 }
 
 // ======================================================
@@ -191,23 +194,39 @@ var dashArgCmd = &zulu.Command{
 	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return []string{"--arg\tan arg starting with dashes"}, zulu.ShellCompDirectiveDefault
 	},
-	Run: func(cmd *zulu.Command, args []string) {},
+	RunE: noopRun,
+}
+
+// ======================================================
+// Command generates many completions.
+// It can be used to test performance.
+// ======================================================
+var manyCompsCmd = &zulu.Command{
+	Use:   "manycomps",
+	Short: "Outputs a thousand completions",
+	ValidArgsFunction: func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
+		var comps []string
+		for i := 0; i < 1000; i++ {
+			comps = append(comps, fmt.Sprintf("%[1]d-comp\tThis is comp %[1]d", i))
+		}
+		return comps, zulu.ShellCompDirectiveDefault
+	},
+	RunE: noopRun,
 }
 
 func setFlags() {
-	rootCmd.Flags().String("customComp", "", "test custom comp for flags")
-	rootCmd.RegisterFlagCompletionFunc("customComp", func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
+	completionFunc := zulu.FlagOptCompletionFunc(func(cmd *zulu.Command, args []string, toComplete string) ([]string, zulu.ShellCompDirective) {
 		return []string{"firstComp\tthe first value", "secondComp\tthe second value", "forthComp"}, zulu.ShellCompDirectiveNoFileComp
 	})
 
-	rootCmd.Flags().String("theme", "", "theme to use (located in /dir/THEMENAME/)")
-	rootCmd.Flags().SetAnnotation("theme", zulu.BashCompSubdirsInDir, []string{"dir"})
+	rootCmd.Flags().String("customComp", "", "test custom comp for flags", completionFunc)
+	rootCmd.Flags().String("theme", "", "theme to use (located in /dir/THEMENAME/)", zulu.FlagOptDirname("dir"))
 
 	dashArgCmd.Flags().Bool("flag", false, "a flag")
 }
 
 func main() {
-	rootCmd.AddCommand(newCompletionCmd(os.Stdout))
+	rootCmd.SetOut(os.Stdout)
 	setFlags()
 
 	rootCmd.AddCommand(
@@ -218,6 +237,7 @@ func main() {
 		subDirCmd,
 		errorCmd,
 		dashArgCmd,
+		manyCompsCmd,
 	)
 
 	prefixCmd.AddCommand(

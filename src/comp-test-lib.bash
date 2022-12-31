@@ -137,6 +137,22 @@ _completionTests_sort() {
   fi
 }
 
+# $1 - The completion to measure
+# $2 - The maximum time to consider it an error
+# $3 - An output prefix
+_completionTests_timing() {
+  TIMEFORMAT=%R
+  timing=$({ time { _completionTests_complete "$1" > /dev/null; } } 2>&1)
+  if (( $(echo "$timing > ${2}" | bc -l) )); then
+    _completionTests_TEST_FAILED=1
+    echo -e "${RED}<= TIMING => ${3}: 1000 completions took ${timing} seconds > ${2-0.1} seconds limit$NC"
+    return 1
+  else
+    echo -e "${GREEN}<= TIMING => ${3}: 1000 completions took ${timing} seconds < ${2-0.1} seconds limit$NC"
+    return 0
+  fi
+}
+
 # Find the completion function associated with the binary.
 # $1 is the first argument of the line to complete which allows
 # us to find the existing completion function name.
@@ -157,8 +173,7 @@ _completionTests_findCompletionFunction() {
 _completionTests_complete() {
   local cmdLine=$1
 
-  # Set the bash completion variables which are
-  # used for both bash and zsh completion
+  # Set the bash completion variables
   COMP_LINE=${cmdLine}
   COMP_POINT=${#COMP_LINE}
   COMP_TYPE=${COMP_TYPE-9} # 9 is TAB, but we allow to override for some tests
@@ -175,10 +190,16 @@ _completionTests_complete() {
   # to stderr.
   eval "$(_completionTests_findCompletionFunction "${COMP_WORDS[0]}")" 2>&1
 
-  # Return the result of the completion.
+  # Return the result of the call to the completion function.
+  # We separate each completion with a space and not a newline; using newlines
+  # was preventing us from detecting empty completions as newlines are stripped
+  # automatically by the sub-shell call to this function.
+  result="$(printf "%s " "${COMPREPLY[@]}")"
+  # remove the last space we inserted ourselves
+  result="${result% }"
   # We use printf instead of echo as the first completion could be -n which
   # would be interpreted as an argument to echo
-  printf "%s\n" "${COMPREPLY[@]}"
+  printf "%s" "${result}"
 }
 
 _completionTests_exit() {

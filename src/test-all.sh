@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -euxo pipefail
 
 # This script runs completion tests in different environments and different shells.
 
@@ -24,29 +24,35 @@ set +e
 GOT_FAILURE=0
 trap "GOT_FAILURE=1" ERR
 
+mapfile -d '' shellTypes < <(find "${BASE_DIR}" -name "comp-tests.*" -printf '%f\0' | cut -z -c 12-)
+getTestShellType() {
+  for shell in "${shellTypes[@]}"; do
+    if [[ $1 == *"-$shell-"* ]]; then
+      printf "%s" "$shell"
+      break
+    fi
+  done
+}
+
 declare -A test_cases=()
 
-for SHELL_TYPE in "$@"; do
-  mapfile -d '' tests < <(find "${BASE_DIR}/tests" -name "Dockerfile.*-${SHELL_TYPE}-*" -print0)
-  for testFile in "${tests[@]}"; do
-    filename="$(basename "$testFile")"
-    testName="${filename:11}" # strip Dockerfile.
+for testName in "$@"; do
+  testFile="${BASE_DIR}/tests/Dockerfile.${testName}"
 
-    imageName="comp-test:$SHELL_TYPE-$testName"
-    test_cases[$imageName]="$SHELL_TYPE"
+  imageName="comp-test:$testName"
+  test_cases[$imageName]="$(getTestShellType "$testName")"
 
-    (
-      exec > >(trap "" INT TERM; sed 's/^/'"$testName"': /')
-      exec 2> >(trap "" INT TERM; sed 's/^/'"$testName"': /' >&2)
-      $CONTAINER_ENGINE build -t "${imageName}" "${BASE_DIR}" -f "$testFile"
-    ) &
-  done
+  (
+    exec > >(trap "" INT TERM; sed 's/^/'"$testName"': /')
+    exec 2> >(trap "" INT TERM; sed 's/^/'"$testName"': /' >&2)
+    $CONTAINER_ENGINE build -t "${imageName}" "${BASE_DIR}" -f "$testFile"
+  ) &
 done
 
 wait
 
 for imageName in "${!test_cases[@]}"; do
-  shellType=${test_cases[$imageName]}
+  shellType="${test_cases[$imageName]}"
   "$CONTAINER_ENGINE" run --rm "${imageName}" "tests/comp-tests.$shellType"
 done
 # Indicate if anything failed during the run
