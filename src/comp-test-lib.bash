@@ -60,44 +60,19 @@ _completionTests_verifyCompletion() {
   local cmdLine="$1"
   local expected="$2"
 
+  shift
+  shift
+
   local nofile=0
   local nospace=0
-  case "${3:-}" in
-  "") ;;
 
-  nofile)
-    nofile=1
-    case "${4:-}" in
-    "") ;;
-
-    nospace)
-      nospace=1
-      ;;
-    *)
-      echo "Invalid directive: $4"
-      exit 1
-      ;;
+  for arg in "$@"; do
+    case "$arg" in
+      nofile) nofile=1 ;;
+      nospace) nofile=1 ;;
+      *) echo "Invalid directive: $4" && exit 1 ;;
     esac
-    ;;
-  nospace)
-    nospace=1
-    case "${4:-}" in
-    "") ;;
-
-    nofile)
-      nofile=1
-      ;;
-    *)
-      echo "Invalid directive: $4"
-      exit 1
-      ;;
-    esac
-    ;;
-  *)
-    echo "Invalid directive: $3"
-    exit 1
-    ;;
-  esac
+  done
 
   result=$(_completionTests_complete "${cmdLine}")
 
@@ -105,7 +80,6 @@ _completionTests_verifyCompletion() {
   expected=$(_completionTests_sort "$expected")
 
   if [ "$result" = "$expected" ]; then
-  set +x
     if ! _completionTests_checkDirective $nofile $nospace "$cmdLine"; then
       _completionTests_TEST_FAILED=1
       return 1

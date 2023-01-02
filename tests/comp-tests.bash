@@ -38,9 +38,6 @@ verifyRedirect() {
 ROOTDIR="$PWD"
 export PATH="$ROOTDIR/testprog/bin:$PATH"
 
-# Are we testing Cobra's bash completion v1 or v2?
-BASHCOMP_VERSION=bash
-
 # Source the testing logic
 # shellcheck source=/dev/null
 source "$ROOTDIR/src/comp-test-lib.bash"
@@ -54,7 +51,7 @@ source "$ROOTDIR/src/comp-test-lib.bash"
 # of from within a real completion environment.
 # shellcheck source=/dev/null
 source /dev/stdin <<-EOF
-   $(testprog completion $BASHCOMP_VERSION --no-descriptions | sed s/builtin/function/g)
+   $(testprog completion bash --no-descriptions | sed s/builtin/function/g)
 EOF
 
 cd testingdir
@@ -211,7 +208,7 @@ unset COMP_TYPE
 # of from within a real completion environment.
 # shellcheck source=/dev/null
 source /dev/stdin <<-EOF
-   $(testprog completion $BASHCOMP_VERSION --descriptions | sed s/builtin/function/g)
+   $(testprog completion bash --descriptions | sed s/builtin/function/g)
 EOF
 
 # Check disabled because it's used in comp-test-lib.bash

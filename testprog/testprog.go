@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gowarden/zulu"
+	"github.com/zulucmd/zulu"
 )
 
 var (
