@@ -1,3 +1,5 @@
+# Moved to https://github.com/zulucmd/zulu/tree/main/completion-integrations
+
 # Regression tests for Cobra completion scripts
 
 The [Cobra](https://github.com/spf13/cobra) library provides support for shell
